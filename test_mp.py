@@ -45,32 +45,83 @@ for i in df.country.unique():
 df_tot=df_tot.resample('W').sum() 
 df_tot_m=df_tot.resample('M').sum() 
 
-prof = mp.compute(np.array(df_tot_m['Sudan']),windows=[12])
-profile = mp.discover.motifs(prof,k=1,radius=10)
-mp.visualize(profile)
-
-# With NA
-test = np.concatenate([np.array(df_tot_m['Sudan']),np.array([float('NaN')]),np.array(df_tot_m['Afghanistan'])])
-plt.plot(test)
-prof = mp.compute(test)
-profile = mp.discover.motifs(prof,k=1)
-mp.visualize(profile)
-
-# Without NA
-test = np.concatenate([np.array(df_tot_m['Sudan']),np.array(df_tot_m['Afghanistan'])])
-prof = mp.compute(test,windows=[12,200])
-profile = mp.discover.motifs(prof,k=5)
-mp.visualize(profile)
 
 test_2=df_tot_m[df_tot_m!=0].dropna(axis=1,thresh=350)
 test_2[test_2.isna()]=0
-#n_test=(test_2-test_2.min())/(test_2.max()-test_2.min())
 n_test=(test_2-test_2.mean())/test_2.std()
 n_test=pd.DataFrame(n_test)
 n_test=np.array(n_test).reshape((n_test.shape[0]*n_test.shape[1],))
 prof = mp.compute(n_test,windows=[12,200])
-mp.visualize(prof)
 profile = mp.discover.motifs(prof,k=3)
-h=mp.visualize(profile)
+mp.visualize(profile)
+
+plt.figure(figsize=(20,5))
+plt.plot(n_test)
+plt.title('Normalized Monthly Fatalities TS')
+plt.xticks([*range(175, 4150, 400)],test_2.columns)
+for i in range(9):
+    plt.vlines(397*(i+1),-2,17,linestyles='--',color='black')
+plt.ylim(-2,17)    
+plt.show()
 
 pmp= profile['pmp'][0,:]
+plt.figure(figsize=(20,5))
+plt.plot(prof['pmp'][0,:])
+plt.xticks([*range(175, 4150, 400)],test_2.columns)
+for i in range(9):
+    plt.vlines(397*(i+1),0.25,2.5,linestyles='--',color='black')
+plt.ylim(0.25,2.5)    
+plt.title('Matrix Profile - Window Length = 12 months')
+plt.show()
+
+#### Catching motifs 
+motifs = prof['motifs'][2]['motifs']
+neigh = prof['motifs'][2]['neighbors']
+comb=motifs+neigh
+ind_m=[]
+for i in comb:
+    ind_m.append(i[1])
+pmp_m = pmp[ind_m]   
+ 
+plt.figure(figsize=(20,5))
+plt.plot(prof['pmp'][0,:])
+plt.xticks([*range(175, 4150, 400)],test_2.columns)
+for i in range(9):
+    plt.vlines(397*(i+1),0.25,2.5,linestyles='--',color='black')
+plt.ylim(0.25,2.5)  
+plt.plot(ind_m,pmp_m,marker='*',color='r',linewidth=0,markersize=15)  
+plt.title('Matrix Profile - Motif 3')
+plt.show()
+
+
+plt.figure(figsize=(20,5))
+plt.plot(n_test)
+plt.title('Normalized Monthly Fatalities TS')
+plt.xticks([*range(175, 4150, 400)],test_2.columns)
+for i in range(9):
+    plt.vlines(397*(i+1),-2,17,linestyles='--',color='black')
+for i in ind_m:
+    plt.plot([*range(i,i+12)],n_test[i:i+12],color='red')
+plt.ylim(-2,17)    
+plt.show()
+
+str_motifs=['Colombia 1','Colombia 2','Colombia 3',
+            'DR Congo 1','DR Congo 2','Etiopia 1',
+            'Etiopia 2','Etiopia 3','Etiopia 4','India 1',
+            'Sudan 1','Sudan 2']
+            
+fig, axs = plt.subplots(4, 3,figsize=(20,15))
+r=0
+c=0
+l=0
+for i in ind_m:
+    axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='red')
+    axs[c, r].set_title(str_motifs[l])
+    r=r+1
+    l=l+1
+    if r==3:
+        r=0
+        c=c+1
+        
+fig.tight_layout()        
+plt.show()        
