@@ -144,13 +144,16 @@ for mot in range(len(prof['motifs'])):
     c=0
     l=0
     for i in ind_m:
-        axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='blue')
-        axs[c, r].plot([*range(i+11,i+15)],n_test[i+11:i+15],color='red',marker='o')
-        axs[c, r].set_title(test_2.columns[i//397])
+        try:
+            axs[c, r].plot(test_2.index[i%397:(i%397)+12],n_test[i:i+12],color='blue')
+            axs[c, r].plot(test_2.index[(i%397)+11:(i%397)+15],n_test[i+11:i+15],color='red',marker='o')
+            axs[c, r].set_title(test_2.columns[i//397])
+        except:
+            1
         r=r+1
         l=l+1
         if r==3:
             r=0
-            c=c+1
+            c=c+1    
     fig.tight_layout()        
     plt.show()   
