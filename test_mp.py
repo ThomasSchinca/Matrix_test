@@ -52,7 +52,7 @@ n_test=(test_2-test_2.mean())/test_2.std()
 n_test=pd.DataFrame(n_test)
 n_test=np.array(n_test).reshape((n_test.shape[0]*n_test.shape[1],))
 prof = mp.compute(n_test,windows=[12,200])
-profile = mp.discover.motifs(prof,k=3)
+profile = mp.discover.motifs(prof,k=15,max_neighbors=18)
 mp.visualize(profile)
 
 plt.figure(figsize=(20,5))
@@ -74,7 +74,7 @@ plt.ylim(0.25,2.5)
 plt.title('Matrix Profile - Window Length = 12 months')
 plt.show()
 
-#### Catching motifs 
+#### Catching motifs 3
 motifs = prof['motifs'][2]['motifs']
 neigh = prof['motifs'][2]['neighbors']
 comb=motifs+neigh
@@ -105,17 +105,19 @@ for i in ind_m:
 plt.ylim(-2,17)    
 plt.show()
 
-str_motifs=['Colombia 1','Colombia 2','Colombia 3',
+str_motifs=['Colombia 1','Colombia 2','Colombia 3','Colombia 4',
             'DR Congo 1','DR Congo 2','Etiopia 1',
-            'Etiopia 2','Etiopia 3','Etiopia 4','India 1',
-            'Sudan 1','Sudan 2']
+            'Etiopia 2','Etiopia 3','Etiopia 4','Etiopia 5','India 1',
+            'Sudan 1','Sudan 2','Turkey 1']
             
-fig, axs = plt.subplots(4, 3,figsize=(20,15))
+fig, axs = plt.subplots(5, 3,figsize=(20,15))
+fig.suptitle('Motifs in blue and following values in Red',fontsize=20)
 r=0
 c=0
 l=0
 for i in ind_m:
-    axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='red')
+    axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='blue')
+    axs[c, r].plot([*range(i+11,i+15)],n_test[i+11:i+15],color='red',marker='o')
     axs[c, r].set_title(str_motifs[l])
     r=r+1
     l=l+1
@@ -125,3 +127,30 @@ for i in ind_m:
         
 fig.tight_layout()        
 plt.show()        
+
+
+###### All motifs
+for mot in range(len(prof['motifs'])):
+    motifs = prof['motifs'][mot]['motifs']
+    neigh = prof['motifs'][mot]['neighbors']
+    comb=motifs+neigh
+    ind_m=[]
+    for i in comb:
+        ind_m.append(i[1])
+    pmp_m = pmp[ind_m]   
+    fig, axs = plt.subplots((len(comb)//3)+1, 3,figsize=(20,15))
+    fig.suptitle('Motifs '+str(mot+1)+' (blue) and following values (red)',fontsize=20)
+    r=0
+    c=0
+    l=0
+    for i in ind_m:
+        axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='blue')
+        axs[c, r].plot([*range(i+11,i+15)],n_test[i+11:i+15],color='red',marker='o')
+        axs[c, r].set_title(test_2.columns[i//397])
+        r=r+1
+        l=l+1
+        if r==3:
+            r=0
+            c=c+1
+    fig.tight_layout()        
+    plt.show()   
