@@ -11,16 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tslearn.matrix_profile import MatrixProfile
 import matplotlib.transforms as mtransforms
-#df = pd.read_stata('C:/Users/thoma/Downloads/S0020818316000059sup001.dta')
-#df1 = pd.read_stata('C:/Users/thoma/Downloads/S0020818316000059sup002.dta')
-#df2 = pd.read_stata('C:/Users/thoma/Downloads/S0020818316000059sup003.dta')
-
-#for i in range(len(df['warname'].unique())):
-#    l = df[df['warname']==df['warname'].unique()[i]]['lndeadpop']
-#    plt.plot(np.exp(l))
-#    plt.title(df['warname'].unique()[i])
-#    plt.show()
-    
+from sklearn.preprocessing import MinMaxScaler 
  
 df = pd.read_csv("https://ucdp.uu.se/downloads/ged/ged221-csv.zip",
                  parse_dates=['date_start',
@@ -157,3 +148,22 @@ for mot in range(len(prof['motifs'])):
             c=c+1    
     fig.tight_layout()        
     plt.show()   
+    
+    tab_mot = n_test[ind_m[0]:ind_m[0]+15].reshape((15,1))
+    for i in ind_m[1:]:
+        tab_mot=np.concatenate([tab_mot,n_test[i:i+15].reshape((15,1))],axis=1)
+    scaler = MinMaxScaler()
+    tab_mot = scaler.fit_transform(tab_mot)
+    tab_mot=pd.DataFrame(tab_mot)
+    m_tab = tab_mot.mean(axis=1)
+    
+    
+    for i in range(len(tab_mot.columns)):
+        plt.plot(tab_mot.iloc[0:12,i],color='blue',alpha=0.1)
+        plt.plot(tab_mot.iloc[11:15,i],color='red',alpha=0.1)
+    plt.plot(m_tab.iloc[0:12],color='blue')    
+    plt.plot(m_tab.iloc[11:15],color='red') 
+    plt.title('Motifs '+str(mot+1))
+    plt.show()
+    
+    
