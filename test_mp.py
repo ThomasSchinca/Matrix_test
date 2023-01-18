@@ -156,14 +156,18 @@ for mot in range(len(prof['motifs'])):
     tab_mot = scaler.fit_transform(tab_mot)
     tab_mot=pd.DataFrame(tab_mot)
     m_tab = tab_mot.mean(axis=1)
+    std_tab = tab_mot.std(axis=1)
     
-    
+    plt.figure(figsize=(8,6))
     for i in range(len(tab_mot.columns)):
         plt.plot(tab_mot.iloc[0:12,i],color='blue',alpha=0.1)
         plt.plot(tab_mot.iloc[11:15,i],color='red',alpha=0.1)
-    plt.plot(m_tab.iloc[0:12],color='blue')    
+    plt.plot(m_tab.iloc[0:12],color='blue',linewidth=2)    
+    plt.plot(m_tab.iloc[11:15],color='red',linewidth=2) 
+    plt.fill_between([*range(12)],m_tab.iloc[0:12]-std_tab.iloc[0:12],m_tab.iloc[0:12]+std_tab.iloc[0:12],color='blue',alpha=0.2)    
     plt.plot(m_tab.iloc[11:15],color='red') 
-    plt.title('Motifs '+str(mot+1))
+    plt.fill_between([*range(11,15)],m_tab.iloc[11:15]-std_tab.iloc[11:15],m_tab.iloc[11:15]+std_tab.iloc[11:15],color='red',alpha=0.2) 
+    plt.title('Motifs '+str(mot+1)+' (CI +/- Std) - N = '+str(len(comb)))
     plt.show()
     
     
