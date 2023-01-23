@@ -136,11 +136,12 @@ for mot in range(len(prof['motifs'])):
     l=0
     for i in ind_m:
         try:
-            axs[c, r].plot(test_2.index[i%397:(i%397)+12],n_test[i:i+12],color='blue')
             axs[c, r].plot(test_2.index[(i%397)+11:(i%397)+15],n_test[i+11:i+15],color='red',marker='o')
+            axs[c, r].plot(test_2.index[i%397:(i%397)+12],n_test[i:i+12],color='blue')
             axs[c, r].set_title(test_2.columns[i//397])
         except:
-            1
+            r=r-1
+            l=l-1
         r=r+1
         l=l+1
         if r==3:
@@ -151,7 +152,8 @@ for mot in range(len(prof['motifs'])):
     
     tab_mot = n_test[ind_m[0]:ind_m[0]+15].reshape((15,1))
     for i in ind_m[1:]:
-        tab_mot=np.concatenate([tab_mot,n_test[i:i+15].reshape((15,1))],axis=1)
+        if len(test_2.index[(i%397)+11:(i%397)+15])>2:
+            tab_mot=np.concatenate([tab_mot,n_test[i:i+15].reshape((15,1))],axis=1)
     scaler = MinMaxScaler()
     tab_mot = scaler.fit_transform(tab_mot)
     tab_mot=pd.DataFrame(tab_mot)
