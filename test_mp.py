@@ -13,6 +13,8 @@ from tslearn.matrix_profile import MatrixProfile
 import matplotlib.transforms as mtransforms
 from sklearn.preprocessing import MinMaxScaler 
  
+### Data Preparation 
+
 df = pd.read_csv("https://ucdp.uu.se/downloads/ged/ged221-csv.zip",
                  parse_dates=['date_start',
                               'date_end'],
@@ -36,12 +38,14 @@ for i in df.country.unique():
 df_tot=df_tot.resample('W').sum() 
 df_tot_m=df_tot.resample('M').sum() 
 
-
 test_2=df_tot_m[df_tot_m!=0].dropna(axis=1,thresh=350)
 test_2[test_2.isna()]=0
 n_test=(test_2-test_2.mean())/test_2.std()
 n_test=pd.DataFrame(n_test)
 n_test=np.array(n_test).reshape((n_test.shape[0]*n_test.shape[1],))
+
+##### Matrix profile analysis
+
 prof = mp.compute(n_test,windows=[12,200])
 profile = mp.discover.motifs(prof,k=15,max_neighbors=18)
 mp.visualize(profile)
@@ -53,6 +57,7 @@ plt.xticks([*range(175, 4150, 400)],test_2.columns)
 for i in range(9):
     plt.vlines(397*(i+1),-2,17,linestyles='--',color='black')
 plt.ylim(-2,17)    
+plt.savefig('Figures_Matrix_analysis/Normalized_Monthly_Fatalities_TS.png')
 plt.show()
 
 pmp= profile['pmp'][0,:]
@@ -63,6 +68,7 @@ for i in range(9):
     plt.vlines(397*(i+1),0.25,2.5,linestyles='--',color='black')
 plt.ylim(0.25,2.5)    
 plt.title('Matrix Profile - Window Length = 12 months')
+plt.savefig('Figures_Matrix_analysis/MP_12m.png')
 plt.show()
 
 #### Catching motifs 3
@@ -82,6 +88,7 @@ for i in range(9):
 plt.ylim(0.25,2.5)  
 plt.plot(ind_m,pmp_m,marker='*',color='r',linewidth=0,markersize=15)  
 plt.title('Matrix Profile - Motif 3')
+plt.savefig('Figures_Matrix_analysis/MP_motif_3.png')
 plt.show()
 
 
@@ -94,33 +101,11 @@ for i in range(9):
 for i in ind_m:
     plt.plot([*range(i,i+12)],n_test[i:i+12],color='red')
 plt.ylim(-2,17)    
+plt.savefig('Figures_Matrix_analysis/TS_motif_3.png')
 plt.show()
+    
 
-str_motifs=['Colombia 1','Colombia 2','Colombia 3','Colombia 4',
-            'DR Congo 1','DR Congo 2','Etiopia 1',
-            'Etiopia 2','Etiopia 3','Etiopia 4','Etiopia 5','India 1',
-            'Sudan 1','Sudan 2','Turkey 1']
-            
-fig, axs = plt.subplots(5, 3,figsize=(20,15))
-fig.suptitle('Motifs in blue and following values in Red',fontsize=20)
-r=0
-c=0
-l=0
-for i in ind_m:
-    axs[c, r].plot([*range(i,i+12)],n_test[i:i+12],color='blue')
-    axs[c, r].plot([*range(i+11,i+15)],n_test[i+11:i+15],color='red',marker='o')
-    axs[c, r].set_title(str_motifs[l])
-    r=r+1
-    l=l+1
-    if r==3:
-        r=0
-        c=c+1
-        
-fig.tight_layout()        
-plt.show()        
-
-
-###### All motifs
+###### All Motifs
 for mot in range(len(prof['motifs'])):
     motifs = prof['motifs'][mot]['motifs']
     neigh = prof['motifs'][mot]['neighbors']
@@ -148,6 +133,7 @@ for mot in range(len(prof['motifs'])):
             r=0
             c=c+1    
     fig.tight_layout()        
+    plt.savefig('Figures_specif_motifs/Motif '+str(mot+1)+'.png')
     plt.show()   
     
     tab_mot = n_test[ind_m[0]:ind_m[0]+15].reshape((15,1))
@@ -170,6 +156,7 @@ for mot in range(len(prof['motifs'])):
     plt.plot(m_tab.iloc[11:15],color='red') 
     plt.fill_between([*range(11,15)],m_tab.iloc[11:15]-std_tab.iloc[11:15],m_tab.iloc[11:15]+std_tab.iloc[11:15],color='red',alpha=0.2) 
     plt.title('Motifs '+str(mot+1)+' (CI +/- Std) - N = '+str(len(comb)))
+    plt.savefig('Figures_motifs_mean_std/Global Motif '+str(mot+1)+'.png')
     plt.show()
     
     
