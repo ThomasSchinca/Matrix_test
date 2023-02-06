@@ -58,7 +58,7 @@ plt.xticks([*range(175, 4150, 400)],test_2.columns)
 for i in range(9):
     plt.vlines(397*(i+1),-2,17,linestyles='--',color='black')
 plt.ylim(-2,17)    
-plt.savefig('Figures_Matrix_analysis/Normalized_Monthly_Fatalities_TS.png')
+#plt.savefig('Figures_Matrix_analysis/Normalized_Monthly_Fatalities_TS.png')
 plt.show()
 
 pmp= profile['pmp'][0,:]
@@ -69,7 +69,7 @@ for i in range(9):
     plt.vlines(397*(i+1),0.25,2.5,linestyles='--',color='black')
 plt.ylim(0.25,2.5)    
 plt.title('Matrix Profile - Window Length = 12 months')
-plt.savefig('Figures_Matrix_analysis/MP_12m.png')
+#plt.savefig('Figures_Matrix_analysis/MP_12m.png')
 plt.show()
 
 #### Catching motifs 3
@@ -89,7 +89,7 @@ for i in range(9):
 plt.ylim(0.25,2.5)  
 plt.plot(ind_m,pmp_m,marker='*',color='r',linewidth=0,markersize=15)  
 plt.title('Matrix Profile - Motif 3')
-plt.savefig('Figures_Matrix_analysis/MP_motif_3.png')
+#plt.savefig('Figures_Matrix_analysis/MP_motif_3.png')
 plt.show()
 
 
@@ -102,7 +102,7 @@ for i in range(9):
 for i in ind_m:
     plt.plot([*range(i,i+12)],n_test[i:i+12],color='red')
 plt.ylim(-2,17)    
-plt.savefig('Figures_Matrix_analysis/TS_motif_3.png')
+#plt.savefig('Figures_Matrix_analysis/TS_motif_3.png')
 plt.show()
     
 
@@ -134,7 +134,7 @@ for mot in range(len(prof['motifs'])):
             r=0
             c=c+1    
     fig.tight_layout()        
-    plt.savefig('Figures_specif_motifs/Motif '+str(mot+1)+'.png')
+    #plt.savefig('Figures_specif_motifs/Motif '+str(mot+1)+'.png')
     plt.show()   
     
     tab_mot = n_test[ind_m[0]:ind_m[0]+15].reshape((15,1))
@@ -157,7 +157,7 @@ for mot in range(len(prof['motifs'])):
     plt.plot(m_tab.iloc[11:15],color='red') 
     plt.fill_between([*range(11,15)],m_tab.iloc[11:15]-std_tab.iloc[11:15],m_tab.iloc[11:15]+std_tab.iloc[11:15],color='red',alpha=0.2) 
     plt.title('Motifs '+str(mot+1)+' (CI +/- Std) - N = '+str(len(comb)))
-    plt.savefig('Figures_motifs_mean_std/Global Motif '+str(mot+1)+'.png')
+    #plt.savefig('Figures_motifs_mean_std/Global Motif '+str(mot+1)+'.png')
     plt.show()
     
     
