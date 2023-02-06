@@ -48,6 +48,7 @@ n_test=np.array(n_test).reshape((n_test.shape[0]*n_test.shape[1],))
 
 prof = mp.compute(n_test,windows=[12,200])
 profile = mp.discover.motifs(prof,k=15,max_neighbors=18)
+profile = mp.discover.motifs(prof,k=15,max_neighbors=18,radius=3)
 mp.visualize(profile)
 
 plt.figure(figsize=(20,5))
