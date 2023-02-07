@@ -159,4 +159,5 @@ for mot in range(len(prof['motifs'])):
     #plt.savefig('Figures_motifs_mean_std/Global Motif '+str(mot+1)+'.png')
     plt.show()
     
+
     
