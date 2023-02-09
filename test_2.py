@@ -65,91 +65,120 @@ for i in seq:
 
               
 ##### Matrix profile analysis
-
-prof = mp.compute(n_test,windows=[12,200])
-profile = mp.discover.motifs(prof,k=10,max_neighbors=200,radius=5)
-#mp.visualize(profile)
-
-l_mot=[]
-df_std=[]
-df_mean=[]
-for mot in range(len(profile['motifs'])):
-    motifs = profile['motifs'][mot]['motifs']
-    neigh = profile['motifs'][mot]['neighbors']
-    comb=motifs+neigh
-    l=[]
-    for el in comb:
-        if el[1] not in exclude:
-            l.append(el[1])
-    l_mot.append(l)        
-    plt.figure(figsize=(8,6))
-    std=pd.DataFrame()
-    for i in l:
-        plt.plot([*range(12)],n_test[i:i+12],color='blue',alpha=0.05)
-        plt.plot([*range(11,15)],n_test[i+11:i+15],color='red',alpha=0.05)
-        n_t=n_test[i:i+15]
-        std=pd.concat([std,pd.Series(n_t)],axis=1)
-    plt.plot([*range(12)],std.mean(axis=1)[:12],color='blue',linewidth=2)
-    plt.plot([*range(11,15)],std.mean(axis=1)[11:15],color='red',linewidth=2)
-    plt.fill_between([*range(12)],std.mean(axis=1)[:12]-std.std(axis=1).iloc[:12],std.mean(axis=1)[:12]+std.std(axis=1).iloc[:12],color='blue',alpha=0.1)      
-    plt.fill_between([*range(11,15)],std.mean(axis=1)[11:15]-std.std(axis=1).iloc[11:15],std.mean(axis=1)[11:15]+std.std(axis=1).iloc[11:15],color='red',alpha=0.1) 
-    df_mean.append(std.mean(axis=1))  
-    df_std.append(std.std(axis=1)) 
-    plt.title('Motif '+str(mot))
-    plt.show()
-        
-df_std=pd.DataFrame(df_std)    
-df_mean=pd.DataFrame(df_mean) 
-
-# =============================================================================
-# Arima comparison
-# =============================================================================
-df_seq=pd.DataFrame()
-for j in seq:
-    df_seq=pd.concat([df_seq,pd.DataFrame([j.values,j.index,[j.name]*len(j.index)])],axis=1)
-df_seq=df_seq.T    
-df_seq.index=range(len(df_seq))
-
-s_p = 1
-res_tot=[]
-for mot in l_mot:
-    mot_d = df_seq.iloc[mot,:].sort_values([1])
-    mot_d_train = mot_d[mot_d[1] <= mot_d[1].iloc[s_p-1] + timedelta(days=100)]    #for three months horizon 
-    mot_d_test = mot_d[mot_d[1] > mot_d[1].iloc[s_p-1] + timedelta(days=100)]
-    seq_train = pd.DataFrame()
-    for j in mot_d_train.index:
-        seq_train=pd.concat([seq_train,pd.Series(n_test[j+12:j+15])],axis=1)
-    res=pd.DataFrame()    
-    for i in range(len(mot_d_test)):
-        train = df_tot_m.loc[:,mot_d_test.iloc[i,2]].loc[:mot_d_test.iloc[i,1]+ timedelta(days=365)]
-        model = auto_arima(train)
-        pred_ar = model.predict(3)
-        pred_mot = seq_train.mean(axis=1)
-        obs = n_test[mot_d_test.index[i]+12:mot_d_test.index[i]+15]
-        res = pd.concat([res,pd.DataFrame([obs,pred_ar,pred_mot]).T])
-        seq_train=pd.concat([seq_train,pd.Series(n_test[mot_d_test.index[i]+12:mot_d_test.index[i]+15])],axis=1)
-    res_tot.append(res)
-
-df_err=pd.DataFrame()
-for i in range(len(res_tot)):
-    try:
-        err_ar_1 = abs(res_tot[i].loc[0,1]-res_tot[i].loc[0,0]).mean()
-        err_mot_1 = abs(res_tot[i].loc[0,2]-res_tot[i].loc[0,0]).mean()
-        err_ar_2 = abs(res_tot[i].loc[1,1]-res_tot[i].loc[1,0]).mean()
-        err_mot_2 = abs(res_tot[i].loc[1,2]-res_tot[i].loc[1,0]).mean()
-        err_ar_3 = abs(res_tot[i].loc[2,1]-res_tot[i].loc[2,0]).mean()
-        err_mot_3 = abs(res_tot[i].loc[2,2]-res_tot[i].loc[2,0]).mean()
-        err_ar_tot = abs(res_tot[i].loc[:,1]-res_tot[i].loc[:,0]).mean()
-        err_mot_tot = abs(res_tot[i].loc[:,2]-res_tot[i].loc[:,0]).mean()
-        df_err = pd.concat([df_err,pd.DataFrame([err_ar_1,err_ar_2,err_ar_3,err_mot_1,err_mot_2,err_mot_3,err_ar_tot,err_mot_tot])],axis=1)
-    except:
-        df_err = pd.concat([df_err,pd.DataFrame([np.zeros((8))],index=range(8)).iloc[:,0]],axis=1)    
-
-df_err = df_err.T
-df_err.columns = ['AR-H1','AR-H2','AR-H3','MOT-H1','MOT-H2','MOT-H3','AR-TOT','MOT-TOT']
-df_err.index = range(1,11)
-
-df_err_tot = pd.DataFrame(df_err.iloc[:,6]-df_err.iloc[:,7],columns=['I_tot'])
-for i in range(3):
-    df_err_tot=pd.concat([df_err_tot,pd.DataFrame(df_err.iloc[:,0+i]-df_err.iloc[:,3+i],columns=['I_h-'+str(i+1)])],axis=1)
+glob_int=pd.DataFrame()
+for rad in [0.5,0.7,1,1.2,1.4,1.6,1.8,2]:
+    prof = mp.compute(n_test,windows=[12,200])
+    profile = mp.discover.motifs(prof,k=50,max_neighbors=200,radius=rad)
+    #mp.visualize(profile)
     
+    l_mot=[]
+    df_std=[]
+    df_mean=[]
+    for mot in range(len(profile['motifs'])):
+        motifs = profile['motifs'][mot]['motifs']
+        neigh = profile['motifs'][mot]['neighbors']
+        comb=motifs+neigh
+        l=[]
+        for el in comb:
+            if el[1] not in exclude:
+                l.append(el[1])
+        l_mot.append(l)        
+        #plt.figure(figsize=(8,6))
+        std=pd.DataFrame()
+        for i in l:
+        #    plt.plot([*range(12)],n_test[i:i+12],color='blue',alpha=0.05)
+        #    plt.plot([*range(11,15)],n_test[i+11:i+15],color='red',alpha=0.05)
+            n_t=n_test[i:i+15]
+            std=pd.concat([std,pd.Series(n_t)],axis=1)
+        #plt.plot([*range(12)],std.mean(axis=1)[:12],color='blue',linewidth=2)
+        #plt.plot([*range(11,15)],std.mean(axis=1)[11:15],color='red',linewidth=2)
+        #plt.fill_between([*range(12)],std.mean(axis=1)[:12]-std.std(axis=1).iloc[:12],std.mean(axis=1)[:12]+std.std(axis=1).iloc[:12],color='blue',alpha=0.1)      
+        #plt.fill_between([*range(11,15)],std.mean(axis=1)[11:15]-std.std(axis=1).iloc[11:15],std.mean(axis=1)[11:15]+std.std(axis=1).iloc[11:15],color='red',alpha=0.1) 
+        df_mean.append(std.mean(axis=1))  
+        df_std.append(std.std(axis=1)) 
+        #plt.title('Motif '+str(mot+1))
+        #plt.show()
+        
+    df_std=pd.DataFrame(df_std)    
+    df_mean=pd.DataFrame(df_mean) 
+    
+    len_c=[]
+    for i in l_mot:
+        len_c.append(len(i))
+    # =============================================================================
+    # Arima comparison
+    # =============================================================================
+    df_seq=pd.DataFrame()
+    for j in seq:
+        df_seq=pd.concat([df_seq,pd.DataFrame([j.values,j.index,[j.name]*len(j.index)])],axis=1)
+    df_seq=df_seq.T    
+    df_seq.index=range(len(df_seq))
+    
+    s_p = 1
+    res_tot=[]
+    for mot in l_mot:
+        mot_d = df_seq.iloc[mot,:].sort_values([1])
+        mot_d_train = mot_d[mot_d[1] <= mot_d[1].iloc[s_p-1] + timedelta(days=100)]    #for three months horizon 
+        mot_d_test = mot_d[mot_d[1] > mot_d[1].iloc[s_p-1] + timedelta(days=100)]
+        seq_train = pd.DataFrame()
+        for j in mot_d_train.index:
+            seq_train=pd.concat([seq_train,pd.Series(n_test[j+12:j+15])],axis=1)
+        res=pd.DataFrame()    
+        for i in range(len(mot_d_test)):
+            train = df_tot_m.loc[:,mot_d_test.iloc[i,2]].loc[:mot_d_test.iloc[i,1]+ timedelta(days=365)]
+            model = auto_arima(train)
+            pred_ar = model.predict(3)
+            pred_mot = seq_train.mean(axis=1)
+            obs = n_test[mot_d_test.index[i]+12:mot_d_test.index[i]+15]
+            res = pd.concat([res,pd.DataFrame([obs,pred_ar,pred_mot]).T])
+            seq_train=pd.concat([seq_train,pd.Series(n_test[mot_d_test.index[i]+12:mot_d_test.index[i]+15])],axis=1)
+        res_tot.append(res)
+    
+    df_err=pd.DataFrame()
+    for i in range(len(res_tot)):
+        try:
+            err_ar_1 = abs(res_tot[i].loc[0,1]-res_tot[i].loc[0,0]).mean()
+            err_mot_1 = abs(res_tot[i].loc[0,2]-res_tot[i].loc[0,0]).mean() 
+            err_ar_2 = abs(res_tot[i].loc[1,1]-res_tot[i].loc[1,0]).mean()
+            err_mot_2 = abs(res_tot[i].loc[1,2]-res_tot[i].loc[1,0]).mean()
+            err_ar_3 = abs(res_tot[i].loc[2,1]-res_tot[i].loc[2,0]).mean()
+            err_mot_3 = abs(res_tot[i].loc[2,2]-res_tot[i].loc[2,0]).mean()
+            err_ar_tot = abs(res_tot[i].loc[:,1]-res_tot[i].loc[:,0]).mean()
+            err_mot_tot = abs(res_tot[i].loc[:,2]-res_tot[i].loc[:,0]).mean()
+            df_err = pd.concat([df_err,pd.DataFrame([err_ar_1,err_ar_2,err_ar_3,err_mot_1,err_mot_2,err_mot_3,err_ar_tot,err_mot_tot])],axis=1)
+        except:
+            df_err = pd.concat([df_err,pd.DataFrame([np.zeros((8))],index=range(8)).iloc[:,0]],axis=1)    
+    
+    df_err = df_err.T
+    df_err.columns = ['AR-H1','AR-H2','AR-H3','MOT-H1','MOT-H2','MOT-H3','AR-TOT','MOT-TOT']
+    df_err.index = range(0,50)
+    
+    df_err_tot = pd.DataFrame(df_err.iloc[:,6]-df_err.iloc[:,7],columns=['I_tot'])
+    for i in range(3):
+        df_err_tot=pd.concat([df_err_tot,pd.DataFrame(df_err.iloc[:,0+i]-df_err.iloc[:,3+i],columns=['I_h-'+str(i+1)])],axis=1)
+    df_err_tot=pd.concat([df_err_tot,df_std.iloc[:,-3:],pd.Series(len_c,name='N_seq_inside'),pd.Series([*range(1,51)],name='N_motif'),pd.Series([rad]*50,name='rad')],axis=1)
+    
+    
+    interest_df = df_err_tot[(df_err_tot.iloc[:,0]>0) & (df_err_tot.iloc[:,1]>0) & (df_err_tot.iloc[:,2]>0) & (df_err_tot.iloc[:,3]>0) & (df_err_tot.iloc[:,7]>5)]
+    for mot in interest_df.iloc[:,8]:
+        motifs = profile['motifs'][mot]['motifs']
+        neigh = profile['motifs'][mot]['neighbors']
+        comb=motifs+neigh
+        l=[]
+        for el in comb:
+            if el[1] not in exclude:
+                l.append(el[1])     
+        plt.figure(figsize=(8,6))
+        std=pd.DataFrame()
+        for i in l:
+            plt.plot([*range(12)],n_test[i:i+12],color='blue',alpha=0.05)
+            plt.plot([*range(11,15)],n_test[i+11:i+15],color='red',alpha=0.05)
+            n_t=n_test[i:i+15]
+            std=pd.concat([std,pd.Series(n_t)],axis=1)
+        plt.plot([*range(12)],std.mean(axis=1)[:12],color='blue',linewidth=2)
+        plt.plot([*range(11,15)],std.mean(axis=1)[11:15],color='red',linewidth=2)
+        plt.fill_between([*range(12)],std.mean(axis=1)[:12]-std.std(axis=1).iloc[:12],std.mean(axis=1)[:12]+std.std(axis=1).iloc[:12],color='blue',alpha=0.1)      
+        plt.fill_between([*range(11,15)],std.mean(axis=1)[11:15]-std.std(axis=1).iloc[11:15],std.mean(axis=1)[11:15]+std.std(axis=1).iloc[11:15],color='red',alpha=0.1) 
+        plt.title('Motif '+str(mot)+' with rad='+str(rad))
+        plt.show()
+    glob_int = pd.concat([glob_int,interest_df],axis=0)    
