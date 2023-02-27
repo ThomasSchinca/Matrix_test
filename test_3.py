@@ -231,7 +231,13 @@ for row in range(len(win_sel)):
         if i[1] not in exclude:
             ind_m.append(i[1])
     pmp_m = pmp[ind_m]   
- 
+    
+    plt.figure(figsize=(20,5))
+    plt.plot(pmp)
+    plt.plot(ind_m,pmp_m,marker='*',color='r',linewidth=0,markersize=15)  
+    plt.title('Motif '+str(row+1)+' - Matrix Profile')
+    plt.show()
+    
     tab_mot = n_test[ind_m[0]:ind_m[0]+h_max+win].reshape((h_max+win,1))
     for i in ind_m[1:]:
         try:
@@ -254,7 +260,7 @@ for row in range(len(win_sel)):
     plt.fill_between([*range(win)],m_tab.iloc[0:win]-std_tab.iloc[0:win],m_tab.iloc[0:win]+std_tab.iloc[0:win],color='blue',alpha=0.2)    
     plt.plot(m_tab.iloc[win-1:h_max+win],color='red') 
     plt.fill_between([*range(win-1,h_max+win)],m_tab.iloc[win-1:h_max+win]-std_tab.iloc[win-1:h_max+win],m_tab.iloc[win-1:h_max+win]+std_tab.iloc[win-1:h_max+win],color='red',alpha=0.2) 
-    plt.title('Motifs '+str(mot+1)+' (CI +/- Std)')
+    plt.title('Motifs '+str(row+1)+' (CI +/- Std) - '+str(win)+' months window')
     #plt.savefig('Figures_motifs_mean_std/Global Motif '+str(mot+1)+'.png')
     plt.show()
     
@@ -360,4 +366,4 @@ for row in range(len(win_sel)):
         plt.boxplot(abs(k.iloc[:,0]-k.iloc[:,1])-abs(k.iloc[:,0]-k.iloc[:,2]),positions=[i], showfliers=False,showmeans=True)
     plt.xticks([*range(h_max)],[*range(1,h_max+1)])
     plt.hlines(0, -0.25, h_max-0.75, colors='red',linestyles='--')
-    plt.title('Motifs '+str(mot+1)+' with N = '+str(len(k)))
+    plt.title('Motifs '+str(row+1)+' with N = '+str(len(k)))
