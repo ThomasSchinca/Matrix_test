@@ -9,15 +9,14 @@ UCDP Fatalities, gathered by country at a **monthly** level (any spacial/tempora
 
 The data is normalized : (X-mean)/std
 
-Only the country with less than 50 zero value are kept, in order to have interesting dynamic for the Matrix profile. 
+Only the sequences with values above zero during a period of  mininmu 60 months (5 years) are kept, in order to have interesting dynamic for the Matrix profile. 
 
-We are computing the 12 months window MP, corresponding to one year. (also adaptable)  
+We are computing a range from 12 to 36 months window Matrix Profile. (also adaptable)  
+We then extract the motifs, or shape, with highest interest. 
 
 ### Figures 
-- In *Figures_Matrix_analysis*, you'll find the images related to the MP (cumulated normalized time series (TS), Matrix profile, 
-and the specific motif location in TS and MP) 
-- In *motifs_mean_std*, you'll find a mean (+/-std as confidence interval) of the normalized motifs (from 0 to 1). 
-- In *specif_motifs*, you'll find every sequence related to a motif, with the country as title and the dates in x-axis. 
-
-In *motifs_mean_std* and *specif_motifs*, the motifs are in blue and the following three months are in red. 
-It's just to check if there is a potential forecasting power. 
+For the three most interresting shapes, some figures are presented in *Motifs_figures* folder.
+- In *General_shape_mot*, you'll find a mean (+/-std as confidence interval) of the normalized motifs (from 0 to 1). The motifs are in blue and the following five months are in red. 
+- In *Individual_seq_mot*, you'll find every sequence related to a motif, with the country as title and the dates in x-axis. Also a forecast comparison between an ARIMA model and the mean value of the other sequences of this motifs are printed. 
+- In *MSE_horizon_mot*, you'll find the MSE improvment of the MP model compared to ARIMA model boxplot. Positive values correspond to a better score of the MP model. 
+- In *MP*, you'll find the Matrix profile and the index of each sequences that belong to this motif (the red stars).   
