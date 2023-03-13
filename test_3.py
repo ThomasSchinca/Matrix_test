@@ -8,15 +8,9 @@ import matrixprofile as mp
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from tslearn.matrix_profile import MatrixProfile
-import matplotlib.transforms as mtransforms
 from sklearn.preprocessing import MinMaxScaler 
-from datetime import timedelta
-from statsmodels.tsa.arima.model import ARIMA
 from pmdarima.arima import auto_arima
-from sklearn.preprocessing import MinMaxScaler
 import bisect
-from pmdarima.arima import auto_arima
 from dateutil.relativedelta import relativedelta
 from scipy.optimize import curve_fit
 
