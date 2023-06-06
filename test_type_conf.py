@@ -70,7 +70,7 @@ exclude,interv,n_test = int_exc(win_l,seq_t)
 l=random.sample(range(len(n_test[:-win_l])), len(n_test[:-win_l]))    
 
 c_tot=[]
-for cou in range(10000,len(l)):
+for cou in range(len(l)):
     i=l[cou]
     if i not in exclude: 
         seq1 = np.array(n_test[i:i+win_l])
