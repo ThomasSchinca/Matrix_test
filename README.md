@@ -27,4 +27,4 @@ For the two most interesting shapes, some figures are presented in *Motifs_figur
 In the first motif, we can observe three peaks of fatalities through 36 months (3 years) with increasing trend. In the last two peaks, we can also spot a 'M' shape with an increase-decrease-increase dynamic.
 
 ### Second
-In the second motif, we can see a little plateau from week 2 to 7 and then, a huge peak of fatalities in weeks 17-18. This sequence takes 18 months (1 year and a half). 
+In the second motif, we can see a little plateau from month 2 to 7 and then, a huge peak of fatalities in months 17-18. This sequence takes 18 months (1 year and a half). 
